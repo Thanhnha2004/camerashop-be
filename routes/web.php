@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Admin\MailController;
 use App\Http\Controllers\Api\AuthController;
-use App\Mail\TestMail;
+use App\Mail\VerifyMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +23,7 @@ Route::get('/', function () {
 
 Route::get('/sendEmail', function(){
     $message = 'Hello';
-    Mail::to('DH52201132@student.stu.edu.vn')->send(new TestMail($message));
+    Mail::to('DH52201132@student.stu.edu.vn')->send(new VerifyMail($message));
 });
 
 Route::get('/login/google', [AuthController::class, 'redirect']);
