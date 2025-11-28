@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\MailController;
 use App\Http\Controllers\Api\AuthController;
+use App\Mail\TestMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,4 +20,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/sendEmail', function(){
+    $message = 'Hello';
+    Mail::to('DH52201132@student.stu.edu.vn')->send(new TestMail($message));
+});
+
 Route::get('/login/google', [AuthController::class, 'redirect']);
+Route::get('/login/google/callback', [AuthController::class, 'googleAuthCallback']);

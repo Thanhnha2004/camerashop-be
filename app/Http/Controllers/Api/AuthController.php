@@ -6,11 +6,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Laravel\Socialite\Facades\Socialite; 
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -89,23 +90,53 @@ class AuthController extends Controller
      */
     public function googleAuthCallback()
     {
-        try{
+        try {
+            // Lấy thông tin người dùng từ Google
             $googleUser = Socialite::driver('google')->user();
-            $user = User::where('google_id', $googleUser->getId())->first();
 
-            if(!$user){
-                $new_user = User::create([
-                    'name'=> $googleUser->getName(),
-                    'email'=> $googleUser->getEmail(),
-                    'google_id'=> $googleUser->getId(),
+            // Tìm xem đã tồn tại user có google_id chưa
+            $user = User::where('google_id', $googleUser->getId())
+                ->orWhere('email', $googleUser->getEmail())
+                ->first();
+
+            // Nếu user chưa tồn tại → tạo mới
+            if (!$user) {
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'password' => Hash::make(uniqid()) // Random password nếu bạn cần
                 ]);
             } else {
-                return 0;
+                // Nếu user đã có email nhưng chưa có google_id → cập nhật thêm
+                if (!$user->google_id) {
+                    $user->google_id = $googleUser->getId();
+                    $user->save();
+                }
             }
-        }catch(Exception $e){
-            dd("something wrong");
+
+            // Xóa token cũ
+            $user->tokens()->delete();
+
+            // Tạo token mới
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            // Trả JSON cho frontend (React, Vue...)
+            return response()->json([
+                'message' => 'Đăng nhập Google thành công',
+                'user' => $user,
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Lỗi Google OAuth',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
+
 
     /**
      * Helper: Tạo Sanctum Token và trả về Response chung
