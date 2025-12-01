@@ -32,12 +32,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// CÁC ROUTE CÔNG KHAI (KHÔNG CẦN TOKEN)
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-
-
-
 // CÁC ROUTE CẦN XÁC THỰC (YÊU CẦU SANCTUM TOKEN)
 Route::middleware('auth:sanctum')->group(function () {
 

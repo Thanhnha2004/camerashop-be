@@ -1,9 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\MailController;
 use App\Http\Controllers\Api\AuthController;
-use App\Mail\VerifyMail;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,14 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/sendEmail', function(){
-    $message = 'Hello';
-    Mail::to('DH52201132@student.stu.edu.vn')->send(new VerifyMail($message));
-});
+// Email verification routes
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify');
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware('auth:sanctum');
 
 Route::get('/login/google', [AuthController::class, 'redirect']);
 Route::get('/login/google/callback', [AuthController::class, 'googleAuthCallback']);

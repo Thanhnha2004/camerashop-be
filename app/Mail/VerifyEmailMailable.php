@@ -9,44 +9,38 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class VerifyMail extends Mailable
+class VerifyEmailMailable extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $messageText;
+    public $verificationUrl;
+    public $userName;
 
-    public function __construct($message)
+    public function __construct($verificationUrl, $userName)
     {
-        $this->messageText = $message;
+        $this->verificationUrl = $verificationUrl;
+        $this->userName = $userName;
     }
 
-    /**
-     * Envelope (from, to, subject)
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
             from: new Address('tranthanhnha.28032004@gmail.com', 'Camerashop'),
-            subject: 'Send test email'
+            subject: 'Xác thực địa chỉ Email của bạn'
         );
     }
 
-    /**
-     * Content (view + variables)
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'vendor.mail.test-mail',
+            view: 'vendor.mail.verify-email',
             with: [
-                'mailMessage' => $this->messageText
+                'verificationUrl' => $this->verificationUrl,
+                'userName' => $this->userName
             ]
         );
     }
 
-    /**
-     * Attachments
-     */
     public function attachments(): array
     {
         return [];
